@@ -23,6 +23,7 @@ jobs:
       NETSUITE_DOMAIN: ${{ secrets.NETSUITE_DOMAIN }}
       NETSUITE_CERTIFICATE_ID: ${{ secrets.NETSUITE_CERTIFICATE_ID }}
       NETSUITE_PRIVATE_KEY: ${{ secrets.NETSUITE_PRIVATE_KEY }}
+      SUITECLOUD_CI_PASSKEY: ${{ secrets.SUITECLOUD_CI_PASSKEY }}
 
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +35,7 @@ jobs:
 
       - run: npm ci
       - run: npm test
-      - run: npm install --global @oracle/suitecloud-cli@3.2.0
+      - run: npm install --global --acceptSuiteCloudSDKLicense @oracle/suitecloud-cli@3.2.0
 
       - name: Configure NetSuite authentication
         shell: bash
@@ -57,6 +58,8 @@ jobs:
               --certificateid "$NETSUITE_CERTIFICATE_ID" \
               --privatekeypath "$key_path"
           fi
+
+          printf 'SUITECLOUD_CI=1\n' >> "$GITHUB_ENV"
 
       - run: suitecloud project:validate
       - run: suitecloud project:package
