@@ -63,5 +63,5 @@ jobs:
 
       - run: suitecloud project:validate
       - run: suitecloud project:package
-      - run: suitecloud project:deploy --dryrun --validate
+      - run: suitecloud project:deploy --dryrun
       - run: suitecloud project:deploy --validate
