@@ -1,0 +1,64 @@
+name: NetSuite deploy
+
+on:
+  push:
+    branches: [sandbox, main]
+
+concurrency:
+  group: netsuite-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    environment: ${{ github.ref_name == 'main' && 'production' || 'sandbox' }}
+
+    env:
+      DEPLOY_ENV: ${{ github.ref_name == 'main' && 'production' || 'sandbox' }}
+      NETSUITE_ACCOUNT_ID: ${{ secrets.NETSUITE_ACCOUNT_ID }}
+      NETSUITE_DOMAIN: ${{ secrets.NETSUITE_DOMAIN }}
+      NETSUITE_CERTIFICATE_ID: ${{ secrets.NETSUITE_CERTIFICATE_ID }}
+      NETSUITE_PRIVATE_KEY: ${{ secrets.NETSUITE_PRIVATE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+      - run: npm install --global @oracle/suitecloud-cli@3.2.0
+
+      - name: Configure NetSuite authentication
+        shell: bash
+        run: |
+          key_path="$RUNNER_TEMP/netsuite-private-key.pem"
+          printf '%s' "$NETSUITE_PRIVATE_KEY" > "$key_path"
+          chmod 600 "$key_path"
+
+          if [[ "$DEPLOY_ENV" == "sandbox" ]]; then
+            suitecloud account:setup:ci \
+              --account "$NETSUITE_ACCOUNT_ID" \
+              --authid "ci-sandbox" \
+              --certificateid "$NETSUITE_CERTIFICATE_ID" \
+              --privatekeypath "$key_path" \
+              --domain "$NETSUITE_DOMAIN"
+          else
+            suitecloud account:setup:ci \
+              --account "$NETSUITE_ACCOUNT_ID" \
+              --authid "ci-production" \
+              --certificateid "$NETSUITE_CERTIFICATE_ID" \
+              --privatekeypath "$key_path"
+          fi
+
+      - run: suitecloud project:validate
+      - run: suitecloud project:package
+      - run: suitecloud project:deploy --dryrun --validate
+      - run: suitecloud project:deploy --validate

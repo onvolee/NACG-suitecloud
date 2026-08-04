@@ -1,0 +1,15 @@
+<restlet scriptid="customscript_lyd_test_hello">
+  <description>Sandbox-only SDF learning RESTlet</description>
+  <isinactive>F</isinactive>
+  <name>lyd_test Hello RESTlet</name>
+  <notifyowner>T</notifyowner>
+  <scriptfile>[/SuiteScripts/lyd_test/lyd_test_hello.js]</scriptfile>
+  <scriptdeployments>
+    <scriptdeployment scriptid="customdeploy_lyd_test_hello">
+      <isdeployed>T</isdeployed>
+      <loglevel>DEBUG</loglevel>
+      <status>TESTING</status>
+      <title>lyd_test Hello RESTlet</title>
+    </scriptdeployment>
+  </scriptdeployments>
+</restlet>
