@@ -20,7 +20,6 @@ jobs:
     env:
       DEPLOY_ENV: ${{ github.ref_name == 'main' && 'production' || 'sandbox' }}
       NETSUITE_ACCOUNT_ID: ${{ secrets.NETSUITE_ACCOUNT_ID }}
-      NETSUITE_DOMAIN: ${{ secrets.NETSUITE_DOMAIN }}
       NETSUITE_CERTIFICATE_ID: ${{ secrets.NETSUITE_CERTIFICATE_ID }}
       NETSUITE_PRIVATE_KEY: ${{ secrets.NETSUITE_PRIVATE_KEY }}
       SUITECLOUD_CI_PASSKEY: ${{ secrets.SUITECLOUD_CI_PASSKEY }}
@@ -49,8 +48,7 @@ jobs:
               --account "$NETSUITE_ACCOUNT_ID" \
               --authid "ci-sandbox" \
               --certificateid "$NETSUITE_CERTIFICATE_ID" \
-              --privatekeypath "$key_path" \
-              --domain "$NETSUITE_DOMAIN"
+              --privatekeypath "$key_path"
           else
             suitecloud account:setup:ci \
               --account "$NETSUITE_ACCOUNT_ID" \
